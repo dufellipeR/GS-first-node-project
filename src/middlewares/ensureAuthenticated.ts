@@ -32,7 +32,7 @@ export default function ensureAuthenticated(
       id: sub,
     };
 
-    console.log(decoded);
+    // console.log(decoded);
 
     return next();
   } catch (err) {
