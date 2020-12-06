@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
 import { container } from 'tsyringe';
-
-import AuthenticateUserService from '@modules/users/services/AuthenticateUserService';
 import ResetPasswordService from '@modules/users/services/ResetPasswordService';
 
 export default class ResetPasswordController {

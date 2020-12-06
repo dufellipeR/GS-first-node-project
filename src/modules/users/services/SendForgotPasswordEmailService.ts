@@ -8,6 +8,10 @@ import AppError from '@shared/errors/AppError';
 import IUsersRepository from '../repositories/IUsersRepository';
 import IUserTokenRepository from '../repositories/IUserTokensRepository';
 
+interface IRequest {
+  email: string;
+  // id: string;
+}
 
 @injectable()
 export default class SendForgotPasswordEmail {
@@ -23,17 +27,19 @@ export default class SendForgotPasswordEmail {
 
   ) {}
 
-  public async execute( email : string): Promise<void> {
-    const user = await this.usersRepository.findByEmail(email);
+  public async execute({ email }:IRequest ): Promise<void> {
+    const user = await this.usersRepository.findByEmail(email)
+
+    console.log(user);
 
     if (!user) {
       throw new AppError('User does not exists.')
     }
 
-    await this.userTokensRepository.generate(user.id)
+    const { token } = await this.userTokensRepository.generate(user.id)
 
-    this.mailProvider.sendMail(email,
-      `Pedido de recuperação de senha recebido,
-       caso não tenha solicitado, apenas ignore `)
+    await this.mailProvider.sendMail(user.email,
+      `Pedido de recuperação de senha recebido: ${token}
+       Caso não tenha solicitado, apenas ignore este e-mail `)
   }
 }
