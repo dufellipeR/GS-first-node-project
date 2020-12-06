@@ -1,6 +1,8 @@
 import IMailProvider from '@shared/container/providers/MailProvider/models/IMailProvider';
 import { inject, injectable } from 'tsyringe';
 
+import path from 'path';
+
 // import User from '@modules/users/infra/typeorm/entities/User';
 
 import AppError from '@shared/errors/AppError';
@@ -28,13 +30,18 @@ export default class SendForgotPasswordEmail {
   public async execute({ email }: IRequest): Promise<void> {
     const user = await this.usersRepository.findByEmail(email);
 
-    console.log(user);
-
     if (!user) {
       throw new AppError('User does not exists.');
     }
 
     const { token } = await this.userTokensRepository.generate(user.id);
+
+    const forgotPasswordTemplate = path.resolve(
+      __dirname,
+      '..',
+      'views',
+      'forgot_password.hbs',
+    );
 
     await this.mailProvider.sendMail({
       to: {
@@ -43,10 +50,10 @@ export default class SendForgotPasswordEmail {
       },
       subject: '[GoBarber] Recuperação de Senha ',
       templateData: {
-        template: 'Olá, {{name}}: {{token}}',
+        file: forgotPasswordTemplate,
         variables: {
           name: user.name,
-          token,
+          link: `http://localhost:3000/reset_password?token=${token}`,
         },
       },
     });
